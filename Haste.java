@@ -34,6 +34,12 @@ public class Haste extends JPanel {
     private static int cameraY = 0;
     private static double cameraZoom = 1.0;
 
+    // Jump variables
+    private static boolean isJumping = false;
+    private static int jumpHeight = 100;
+    private static int jumpSpeed = 5;
+    private static int currentJump = 0;
+
     public static void main(String[] args) {
         // Create the game window
         Haste game = new Haste();
@@ -80,7 +86,26 @@ public class Haste extends JPanel {
             playerY = Math.max(0, playerY - 1);
         } else if (InputHandler.isKeyDown(KeyEvent.VK_DOWN)) {
             playerY = Math.min(WORLD_HEIGHT - 1, playerY + 1);
+        } else if (InputHandler.isKeyDown(KeyEvent.VK_SPACE) && !isJumping) {
+            jump();
         }
+
+        // Update the jump
+        if (isJumping) {
+            currentJump += jumpSpeed;
+            playerY = playerY - jumpSpeed;
+            if (currentJump >= jumpHeight) {
+                isJumping = false;
+            }
+        } else {
+            // Apply gravity when not jumping
+            playerY = Math.min(playerY + jumpSpeed, WORLD_HEIGHT - 1);
+        }
+    }
+
+    private void jump() {
+        isJumping = true;
+        currentJump = 0;
     }
 
     @Override
