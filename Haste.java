@@ -2,7 +2,11 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.event.KeyEvent;
@@ -24,10 +28,10 @@ public class Haste extends JPanel {
     private static ArrayList<String> playerInventory = new ArrayList<>(PLAYER_INVENTORY);
 
     // Set up the world
-    private static final int WORLD_WIDTH = 1000;
-    private static final int WORLD_HEIGHT = 1000;
+    private static final int WORLD_WIDTH = WINDOW_WIDTH;
+    private static final int WORLD_HEIGHT = WINDOW_HEIGHT;
     private static String[][] terrain = new String[WORLD_WIDTH][WORLD_HEIGHT];
-    private static ArrayList<Monster> monsters = new ArrayList<>();
+    // private static ArrayList<Monster> monsters = new ArrayList<>();
 
     // Set up the camera
     private static int cameraX = 0;
@@ -39,6 +43,17 @@ public class Haste extends JPanel {
     private static int jumpHeight = 100;
     private static int jumpSpeed = 5;
     private static int currentJump = 0;
+
+    // Background image
+    private BufferedImage backgroundImage;
+
+    public Haste() {
+        try {
+            backgroundImage = ImageIO.read(new File("dojo.jpg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] args) {
         // Create the game window
@@ -110,18 +125,11 @@ public class Haste extends JPanel {
 
     @Override
     public void paint(Graphics g) {
-
         Graphics2D g2d = (Graphics2D) g;
 
-        // Fill the top two-thirds of the screen with blue
-        int topHeight = WINDOW_HEIGHT * 2 / 3;
-        g2d.setColor(new Color(135, 206, 250)); // Light blue
-        g2d.fillRect(0, 0, WINDOW_WIDTH, topHeight);
+        // Draw the background image
+        g2d.drawImage(backgroundImage, 0, 0, null);
 
-        // Fill the bottom one-third of the screen with dark green
-        int bottomHeight = WINDOW_HEIGHT - topHeight;
-        g2d.setColor(new Color(0, 100, 0)); // Dark green
-        g2d.fillRect(0, topHeight, WINDOW_WIDTH, bottomHeight);
         // Update the camera
         cameraX = playerX - WINDOW_WIDTH / 2;
         cameraY = playerY - WINDOW_HEIGHT / 2;
@@ -155,8 +163,6 @@ public class Haste extends JPanel {
                 y >= cameraY && y <= cameraY + WINDOW_HEIGHT) {
             // Draw the terrain for a given location
             // This function can be customized to draw different types of terrain
-            g.setColor(new Color(50, 200, 50));
-            g.fillRect((x - cameraX) * 50, (y - cameraY) * 50, 50, 50);
 
             // Check if the player is standing on this terrain block
             if (x == playerX && y == playerY) {
@@ -173,47 +179,40 @@ public class Haste extends JPanel {
         g.fillOval(screenX, screenY, 40, 40);
     }
 
-    private void drawMonster(Graphics2D g, Monster monster) {
-        // Draw a monster
-        g.setColor(new Color(200, 50, 50));
-        g.fillOval((monster.getX() - cameraX) * 50 + 5, (monster.getY() - cameraY) * 50 + 5, 40, 40);
-    }
+    // private void drawMonster(Graphics2D g, Monster monster) {
+    // // Draw a monster
+    // g.setColor(new Color(200, 50, 50));
+    // g.fillOval((monster.getX() - cameraX) + WINDOW_WIDTH / 2 - 20,
+    // (monster.getY() - cameraY) + WINDOW_HEIGHT / 2 - 20, 40, 40);
+    // }
+}
 
-    private static class InputHandler implements KeyListener {
-        private static boolean[] keys = new boolean[256];
+class InputHandler implements KeyListener {
 
-        public void keyPressed(KeyEvent e) {
-            keys[e.getKeyCode()] = true;
-        }
+    private static boolean[] keys = new boolean[256];
 
-        public void keyReleased(KeyEvent e) {
-            keys[e.getKeyCode()] = false;
-        }
-
-        public static boolean isKeyDown(int keyCode) {
+    public static boolean isKeyDown(int keyCode) {
+        if (keyCode >= 0 && keyCode < 256) {
             return keys[keyCode];
         }
+        return false;
+    }
 
-        // Override unused KeyListener methods
-        public void keyTyped(KeyEvent e) {
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() >= 0 && e.getKeyCode() < 256) {
+            keys[e.getKeyCode()] = true;
         }
     }
 
-    private static class Monster {
-        private int x;
-        private int y;
-
-        public Monster(int x, int y) {
-            this.x = x;
-            this.y = y;
+    @Override
+    public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() >= 0 && e.getKeyCode() < 256) {
+            keys[e.getKeyCode()] = false;
         }
+    }
 
-        public int getX() {
-            return x;
-        }
-
-        public int getY() {
-            return y;
-        }
+    @Override
+    public void keyTyped(KeyEvent e) {
     }
 }
